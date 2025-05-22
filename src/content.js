@@ -1,16 +1,25 @@
-// Add CSS for spinner animation at the beginning to ensure it's available
+const SELECTORS = {
+  jobTitle: '.job-details-jobs-unified-top-card__job-title',
+  companyName: '.job-details-jobs-unified-top-card__company-name',
+  jobDescription: '.jobs-description__container',
+};
+
+
+
+// Add CSS for spinner animation with namespaced class
 const styleSheet = document.createElement('style');
 styleSheet.textContent = `
     @keyframes betterLinkedinSpin {
         from { transform: rotate(0deg); }
         to { transform: rotate(360deg); }
     }
+    .bli-loading-spinner { /* namespace for extension spinner */ }
 `;
 document.head.appendChild(styleSheet);
 
 // Function to extract job title from LinkedIn (details and search panel)
 function extractJobTitle() {
-    let titleElement = document.querySelector('.job-details-jobs-unified-top-card__job-title');
+    let titleElement = document.querySelector(SELECTORS.jobTitle);
     if (titleElement) {
         return titleElement.textContent.trim();
     }
@@ -19,7 +28,7 @@ function extractJobTitle() {
 
 // Function to extract company name from LinkedIn (details and search panel)
 function extractCompanyName() {
-    let companyElement = document.querySelector('.job-details-jobs-unified-top-card__company-name');
+    let companyElement = document.querySelector(SELECTORS.companyName);
     if (companyElement) {
         return companyElement.textContent.trim();
     }
@@ -28,7 +37,7 @@ function extractCompanyName() {
 
 // Function to extract job description from LinkedIn (details and search panel)
 function extractJobDescription() {
-    let descriptionElement = document.querySelector('.jobs-description__container');
+    let descriptionElement = document.querySelector(SELECTORS.jobDescription);
     if (descriptionElement) {
         return descriptionElement.textContent.trim();
     }
@@ -185,7 +194,7 @@ function setButtonLoading(button, isLoading) {
 
         // Create new spinner
         const spinner = document.createElement('span');
-        spinner.className = 'loading-spinner';
+        spinner.className = 'bli-loading-spinner'; // namespaced
 
         // Apply styles directly to ensure animation works
         spinner.style.marginLeft = '8px';
@@ -212,7 +221,7 @@ function setButtonLoading(button, isLoading) {
 // --- Robustly inject Analyze Job button after job title (details and search panel) ---
 function injectAnalyzeButton() {
     // Try details page selectors
-    let jobTitle = document.querySelector('.job-details-jobs-unified-top-card__job-title');
+    let jobTitle = document.querySelector(SELECTORS.jobTitle);
     let h1 = jobTitle ? jobTitle.querySelector('h1') : null;
 
     if (!jobTitle || !h1) return;
