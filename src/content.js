@@ -290,9 +290,10 @@ function injectAnalyzeButton() {
 
 
 // --- Wait for job title or search panel using MutationObserver ---
+let observer;
 function observeForJobTitleOrSearchPanel() {
-    injectAnalyzeButton(); // Try immediately in case already present
-    const observer = new MutationObserver(() => {
+    if (observer) observer.disconnect();
+    observer = new MutationObserver((mutationsList, observerInstance) => {
         injectAnalyzeButton();
     });
     observer.observe(document.body, { childList: true, subtree: true });
@@ -300,6 +301,10 @@ function observeForJobTitleOrSearchPanel() {
 
 // --- Watch for URL changes and clear analysis content ---
 let lastUrl = location.href;
+function cleanupObservers() {
+    if (observer) observer.disconnect();
+}
+window.addEventListener('beforeunload', cleanupObservers);
 function watchUrlChangeAndClearAnalysis() {
     setInterval(() => {
         if (location.href !== lastUrl) {
