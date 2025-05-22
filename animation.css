@@ -1,0 +1,66 @@
+/* Animation styles for Better LinkedIn Extension */
+
+/* Fade in animation for content */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Pulse animation for buttons */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(10, 102, 194, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(10, 102, 194, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(10, 102, 194, 0);
+  }
+}
+
+/* Ripple animation */
+@keyframes ripple {
+  to {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+/* Spinner animation */
+@keyframes spin {
+  to { 
+    transform: rotate(360deg); 
+  }
+}
+
+/* Apply animations to elements */
+.header {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.content {
+  animation: fadeIn 0.5s ease-out 0.1s both;
+}
+
+.footer {
+  animation: fadeIn 0.5s ease-out 0.2s both;
+}
+
+.btn-primary:hover {
+  animation: pulse 1.5s infinite;
+}
+
+/* Transition for all interactive elements */
+.btn,
+.form-input,
+.form-label,
+.status {
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}

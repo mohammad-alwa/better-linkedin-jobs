@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Better LinkedIn</title>
+    <link rel="stylesheet" href="popup.css">
+    <link rel="stylesheet" href="animation.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+</head>
+<body>
+    <div class="header">
+        <div class="header-logo">
+            <img src="icons/icon16.png" alt="Better LinkedIn Logo">
+            <h1 class="header-title">Better LinkedIn</h1>
+        </div>
+    </div>
+
+    <div class="content">
+        <p class="description">
+            Enter your Gemini API key to get started.
+            Only <strong>Gemini 2.0 Flash</strong> will be used and called from your extension.
+        </p>
+
+        <!-- No API Key State (Default) -->
+        <div id="noKeyState">
+            <div class="form-group">
+                <input id="apiKey" class="form-input" type="password" required>
+                <label for="apiKey" class="form-label">Gemini API Key</label>
+            </div>
+
+            <div class="form-group">
+                <button id="saveKey" class="btn btn-primary">Save API Key</button>
+            </div>
+        </div>
+
+        <!-- Existing API Key State -->
+        <div id="existingKeyState" style="display: none;">
+            <div class="key-display">
+                <div class="key-info">
+                    <span class="key-label">API Key:</span>
+                    <span id="maskedKey" class="masked-key"></span>
+                </div>
+                <div class="key-actions">
+                    <button id="changeKey" class="btn btn-secondary">
+                        <span class="material-icons">edit</span>
+                        Change
+                    </button>
+                    <button id="removeKey" class="btn btn-danger">
+                        <span class="material-icons">delete</span>
+                        Remove
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="status" class="status"></div>
+
+        <div class="info-box">
+            <span class="material-icons info-icon">info</span>
+            <p class="info-text">Your API key is stored securely in your browser and is only used to analyze job descriptions.</p>
+        </div>
+    </div>
+
+    <div class="footer">
+        Better LinkedIn Jobs - Enhance your job search with AI
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>

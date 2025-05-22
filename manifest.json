@@ -1,8 +1,15 @@
 {
   "manifest_version": 3,
-  "name": "Better LinkedIn Extension",
+  "name": "Better LinkedIn Jobs Extension",
   "version": "1.0",
-  "description": "A Chrome extension to enhance LinkedIn experience",
+  "description": "A Chrome extension to enhance LinkedIn Jobs experience",
+  "permissions": [
+    "storage",
+    "scripting"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
