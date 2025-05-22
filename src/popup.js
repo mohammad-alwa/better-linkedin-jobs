@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Save the API key to Chrome extension storage
-        chrome.storage.sync.set({ geminiApiKey: apiKey }, function() {
+        chrome.storage.local.set({ geminiApiKey: apiKey }, function() {
             // Remove loading spinner
             loadingSpinner.remove();
             saveButton.disabled = false;
@@ -185,7 +185,7 @@ document.addEventListener('DOMContentLoaded', function() {
         changeKeyButton.disabled = true;
 
         // Remove the API key from Chrome extension storage
-        chrome.storage.sync.remove('geminiApiKey', function() {
+        chrome.storage.local.remove('geminiApiKey', function() {
             // Remove loading spinner
             loadingSpinner.remove();
             removeKeyButton.disabled = false;
@@ -201,7 +201,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Check if API key already exists in extension storage
-    chrome.storage.sync.get(['geminiApiKey'], function(result) {
+    chrome.storage.local.get(['geminiApiKey'], function(result) {
         if (result.geminiApiKey) {
             showUiState(true, result.geminiApiKey);
         } else {

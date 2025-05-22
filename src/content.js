@@ -39,7 +39,7 @@ function extractJobDescription() {
 async function analyzeJobDescription() {
     try {
         // Get API key from storage
-        const result = await chrome.storage.sync.get(['geminiApiKey']);
+        const result = await chrome.storage.local.get(['geminiApiKey']);
         const apiKey = result.geminiApiKey;
 
         if (!apiKey) {
