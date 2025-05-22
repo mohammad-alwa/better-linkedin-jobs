@@ -5,11 +5,18 @@
   "description": "A Chrome extension to enhance LinkedIn Jobs experience",
   "permissions": [
     "storage",
+    "activeTab",
     "scripting"
   ],
   "action": {
     "default_popup": "src/popup.html"
   },
+  "content_scripts": [
+    {
+      "matches": ["https://www.linkedin.com/jobs/*"],
+      "js": ["src/content.js"]
+    }
+  ],
   "icons": {
     "16": "src/assets/icons/icon16.png",
     "48": "src/assets/icons/icon48.png",
