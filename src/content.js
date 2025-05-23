@@ -13,6 +13,9 @@ const CACHE_STORAGE_KEY = 'jobAnalysisCache';
 // In-memory cache for job analysis results
 const memoryCache = new Map(); // Map<jobId, analysisResult>
 
+// Auto analysis configuration
+let isAutoAnalysisEnabled = false;
+
 // Function to check if we're on the job search page
 function isJobSearchPage() {
   return window.location.href.includes('/jobs/search/');
@@ -117,6 +120,30 @@ function loadCache() {
 
 // Initialize cache when script loads
 loadCache();
+
+// Function to load auto analysis setting
+function loadAutoAnalysisSetting() {
+    chrome.storage.local.get(['autoAnalysisEnabled'], (result) => {
+        if (chrome.runtime.lastError) {
+            console.error('Error loading auto analysis setting:', chrome.runtime.lastError);
+            return;
+        }
+
+        isAutoAnalysisEnabled = result.autoAnalysisEnabled === true;
+        console.log(`Auto analysis is ${isAutoAnalysisEnabled ? 'enabled' : 'disabled'}`);
+    });
+}
+
+// Listen for changes to auto analysis setting
+chrome.storage.onChanged.addListener((changes, namespace) => {
+    if (namespace === 'local' && changes.autoAnalysisEnabled) {
+        isAutoAnalysisEnabled = changes.autoAnalysisEnabled.newValue === true;
+        console.log(`Auto analysis setting changed to: ${isAutoAnalysisEnabled ? 'enabled' : 'disabled'}`);
+    }
+});
+
+// Initialize auto analysis setting
+loadAutoAnalysisSetting();
 
 
 
@@ -383,6 +410,25 @@ async function injectAnalyzeButton() {
         const cachedAnalysis = getFromCache(jobId);
         if (cachedAnalysis) {
             displayAnalysisResults(container, cachedAnalysis, true);
+        } else if (isAutoAnalysisEnabled) {
+            // If auto analysis is enabled and no cached result, trigger analysis automatically
+            console.log(`Auto analysis triggered for job ${jobId}`);
+
+            // Show loading state
+            setButtonLoading(analyzeButton, true);
+
+            // Trigger analysis
+            analyzeJobDescription().then(analysis => {
+                if (analysis) {
+                    displayAnalysisResults(container, analysis, false);
+                }
+
+                // Reset button state
+                setButtonLoading(analyzeButton, false);
+            }).catch(error => {
+                console.error('Auto analysis failed:', error);
+                setButtonLoading(analyzeButton, false);
+            });
         }
     }
 }

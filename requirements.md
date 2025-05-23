@@ -56,6 +56,12 @@ If the API key is present, there will be a checkbox for "Auto Analysis", disable
     - Look for `ul` that has class `job-card-list__footer-wrapper` within the card
     - Append to it an `li` item containing the analysis result
 
+### Auto Analysis
+- If the auto analysis is enabled then this feature will be enabled on both jobs search and job details pages.
+- If the current job is not cached and auto analysis is enabled, then trigger the job analysis automatically
+- The Analyze Job button should indicate the analysis is in progress just like manual analysis
+- All the other related side effects in the manual analysis will apply to the auto analysis such as caching
+
 ### UI/UX
 - BLJ will use style similar to LinkedIn for both the settings popup, analysis button and the analysis result.
 - BLJ will follow best practicies in UI/UX to create modern design, it will utlize css without any external dependecy.

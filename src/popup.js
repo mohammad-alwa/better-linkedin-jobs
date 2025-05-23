@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const maskedKeySpan = document.getElementById('maskedKey');
     const changeKeyButton = document.getElementById('changeKey');
     const removeKeyButton = document.getElementById('removeKey');
+    const autoAnalysisCheckbox = document.getElementById('autoAnalysisCheckbox');
 
     // Add ripple effect to buttons
     function createRipple(event) {
@@ -200,10 +201,32 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Check if API key already exists in extension storage
-    chrome.storage.local.get(['geminiApiKey'], function(result) {
+    // Handle auto analysis checkbox change
+    autoAnalysisCheckbox.addEventListener('change', function() {
+        const isChecked = this.checked;
+
+        // Save the auto analysis setting to storage
+        chrome.storage.local.set({ autoAnalysisEnabled: isChecked }, function() {
+            if (chrome.runtime.lastError) {
+                showStatus('Error saving setting: ' + chrome.runtime.lastError.message, 'error');
+            } else {
+                showStatus(
+                    isChecked ? 'Auto Analysis enabled' : 'Auto Analysis disabled',
+                    'success'
+                );
+            }
+        });
+    });
+
+    // Check if API key already exists in extension storage and load auto analysis setting
+    chrome.storage.local.get(['geminiApiKey', 'autoAnalysisEnabled'], function(result) {
         if (result.geminiApiKey) {
             showUiState(true, result.geminiApiKey);
+
+            // Set checkbox state based on stored setting
+            if (result.autoAnalysisEnabled !== undefined) {
+                autoAnalysisCheckbox.checked = result.autoAnalysisEnabled;
+            }
         } else {
             showUiState(false);
         }
