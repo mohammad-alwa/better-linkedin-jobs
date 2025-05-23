@@ -146,28 +146,28 @@ document.addEventListener('DOMContentLoaded', () => {
         saveButton.appendChild(loadingSpinner);
         saveButton.disabled = true;
 
-            // Validate the API key
-            const validation = await validateApiKey(apiKey);
+        // Validate the API key
+        const validation = await validateApiKey(apiKey);
 
-            if (!validation.valid) {
-                loadingSpinner.remove();
-                saveButton.disabled = false;
-                showStatus(validation.error, 'error');
-                return;
-            }
+        if (!validation.valid) {
+            loadingSpinner.remove();
+            saveButton.disabled = false;
+            showStatus(validation.error, 'error');
+            return;
+        }
 
-            // Save the API key to Chrome extension storage
-        chrome.storage.local.set({ geminiApiKey: apiKey }, function() {
+        // Save the API key to Chrome extension storage
+        chrome.storage.local.set({ geminiApiKey: apiKey }, function () {
             // Remove loading spinner
             loadingSpinner.remove();
             saveButton.disabled = false;
 
-                    if (chrome.runtime.lastError) {
-                        showStatus('Error saving API key: ' + chrome.runtime.lastError.message, 'error');
-                    } else {
-                        showStatus('API key saved successfully!', 'success');
-                        showUiState(true, apiKey);
-                    }
+            if (chrome.runtime.lastError) {
+                showStatus('Error saving API key: ' + chrome.runtime.lastError.message, 'error');
+            } else {
+                showStatus('API key saved successfully!', 'success');
+                showUiState(true, apiKey);
+            }
         });
     });
 
@@ -185,8 +185,8 @@ document.addEventListener('DOMContentLoaded', () => {
         removeKeyButton.disabled = true;
         changeKeyButton.disabled = true;
 
-            // Remove the API key from Chrome extension storage
-        chrome.storage.local.remove('geminiApiKey', function() {
+        // Remove the API key from Chrome extension storage
+        chrome.storage.local.remove('geminiApiKey', function () {
             // Remove loading spinner
             loadingSpinner.remove();
             removeKeyButton.disabled = false;
@@ -205,30 +205,30 @@ document.addEventListener('DOMContentLoaded', () => {
     autoAnalysisCheckbox.addEventListener('change', async (event) => {
         const isChecked = event.target.checked;
 
-            // Save the auto analysis setting to storage
-        chrome.storage.local.set({ autoAnalysisEnabled: isChecked }, function() {
-                    if (chrome.runtime.lastError) {
-                        showStatus('Error saving setting: ' + chrome.runtime.lastError.message, 'error');
-                    } else {
-                        showStatus(
-                            isChecked ? 'Auto Analysis enabled' : 'Auto Analysis disabled',
-                            'success'
-                        );
-                    }
-                });
-            });
+        // Save the auto analysis setting to storage
+        chrome.storage.local.set({ autoAnalysisEnabled: isChecked }, function () {
+            if (chrome.runtime.lastError) {
+                showStatus('Error saving setting: ' + chrome.runtime.lastError.message, 'error');
+            } else {
+                showStatus(
+                    isChecked ? 'Auto Analysis enabled' : 'Auto Analysis disabled',
+                    'success'
+                );
+            }
+        });
+    });
 
     // Check if API key already exists in extension storage and load auto analysis setting
-    chrome.storage.local.get(['geminiApiKey', 'autoAnalysisEnabled'], function(result) {
-            if (result.geminiApiKey) {
-                showUiState(true, result.geminiApiKey);
+    chrome.storage.local.get(['geminiApiKey', 'autoAnalysisEnabled'], function (result) {
+        if (result.geminiApiKey) {
+            showUiState(true, result.geminiApiKey);
 
-                // Set checkbox state based on stored setting
-                if (result.autoAnalysisEnabled !== undefined) {
-                    autoAnalysisCheckbox.checked = result.autoAnalysisEnabled;
-                }
-            } else {
-                showUiState(false);
+            // Set checkbox state based on stored setting
+            if (result.autoAnalysisEnabled !== undefined) {
+                autoAnalysisCheckbox.checked = result.autoAnalysisEnabled;
             }
+        } else {
+            showUiState(false);
+        }
     });
 });
