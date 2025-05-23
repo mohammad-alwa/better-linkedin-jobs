@@ -1,0 +1,78 @@
+/* Animation for loading spinner */
+@keyframes betterLinkedinSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Container for job analysis */
+.job-analysis-container {
+    margin-top: 12px;
+    background: #f5f6f7;
+    border-radius: 4px;
+    padding: 16px;
+    border: 1px solid #e0e0e0;
+}
+
+/* Analyze button */
+.job-analysis-button {
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 3px;
+    background: #ffffff;
+    border: 1px solid #0a66c2;
+    color: #0a66c2;
+}
+
+/* Results container */
+.job-analysis-results {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+/* Individual analysis item */
+.job-analysis-item {
+    display: inline-flex;
+    align-items: center;
+    background-color: #FDFDFD;
+    border-radius: 16px;
+    padding: 4px 12px;
+    font-size: 14px;
+    color: #0a66c2;
+    font-weight: 600;
+    border: 1px solid #E0E0E0;
+}
+
+/* Loading spinner */
+.bli-loading-spinner {
+    margin-left: 8px;
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #0a66c2;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: betterLinkedinSpin 1s linear infinite;
+}
+
+/* Button in loading state */
+.button-loading {
+    opacity: 0.8;
+}
+
+/* Cached indicator */
+.cached-indicator {
+    font-size: 12px;
+    color: #666;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+}
+
+/* Cached indicator icon */
+.cached-indicator-icon {
+    color: #0a66c2;
+    margin-right: 4px;
+}

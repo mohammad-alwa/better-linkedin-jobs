@@ -112,16 +112,6 @@ function loadCache() {
 loadCache();
 
 
-// Add CSS for spinner animation with namespaced class
-const styleSheet = document.createElement('style');
-styleSheet.textContent = `
-    @keyframes betterLinkedinSpin {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-    }
-    .bli-loading-spinner { /* namespace for extension spinner */ }
-`;
-document.head.appendChild(styleSheet);
 
 // Function to extract job title from LinkedIn (details and search panel)
 function extractJobTitle() {
@@ -252,52 +242,6 @@ experience: what's the experience level required? Add years of experience if men
 }
 
 
-// Define common styles
-const styles = {
-    container: `
-        margin-top: 12px;
-        background: #f5f6f7;
-        border-radius: 4px;
-        padding: 16px;
-        border: 1px solid #e0e0e0;
-    `,
-    button: `
-        padding: 8px 16px;
-        font-size: 14px;
-        font-weight: 600;
-        border-radius: 3px;
-        background: #ffffff;
-        border: 1px solid #0a66c2;
-        color: #0a66c2;
-    `,
-    results: `
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-top: 16px;
-    `,
-    item: `
-        display: inline-flex;
-        align-items: center;
-        background-color: #FDFDFD;
-        border-radius: 16px;
-        padding: 4px 12px;
-        font-size: 14px;
-        color: #0a66c2;
-        font-weight: 600;
-        border: 1px solid #E0E0E0;
-    `,
-    spinner: `
-        margin-left: 8px;
-        display: inline-block;
-        width: 16px;
-        height: 16px;
-        border: 2px solid #0a66c2;
-        border-radius: 50%;
-        border-top-color: transparent;
-        animation: betterLinkedinSpin 1s linear infinite;
-    `
-};
 
 // Helper function to show loading state on a button
 function setButtonLoading(button, isLoading) {
@@ -305,30 +249,20 @@ function setButtonLoading(button, isLoading) {
         button.disabled = true;
 
         // Remove any existing spinner first
-        const existingSpinner = button.querySelector('.loading-spinner');
+        const existingSpinner = button.querySelector('.bli-loading-spinner');
         if (existingSpinner) existingSpinner.remove();
 
         // Create new spinner
         const spinner = document.createElement('span');
-        spinner.className = 'bli-loading-spinner'; // namespaced
-
-        // Apply styles directly to ensure animation works
-        spinner.style.marginLeft = '8px';
-        spinner.style.display = 'inline-block';
-        spinner.style.width = '16px';
-        spinner.style.height = '16px';
-        spinner.style.border = '2px solid #0a66c2';
-        spinner.style.borderRadius = '50%';
-        spinner.style.borderTopColor = 'transparent';
-        spinner.style.animation = 'betterLinkedinSpin 1s linear infinite';
+        spinner.className = 'bli-loading-spinner';
 
         button.appendChild(spinner);
-        button.style.opacity = '0.8';
+        button.classList.add('button-loading');
     } else {
         button.disabled = false;
-        const spinner = button.querySelector('.loading-spinner');
+        const spinner = button.querySelector('.bli-loading-spinner');
         if (spinner) spinner.remove();
-        button.style.opacity = '1';
+        button.classList.remove('button-loading');
     }
 }
 
@@ -343,7 +277,6 @@ function displayAnalysisResults(container, analysis, isCached = false) {
     // Create results container
     const resultsDiv = document.createElement('div');
     resultsDiv.className = 'job-analysis-results';
-    resultsDiv.style.cssText = styles.results;
 
     // Define analysis items to display
     const items = [
@@ -359,7 +292,6 @@ function displayAnalysisResults(container, analysis, isCached = false) {
 
         const itemDiv = document.createElement('div');
         itemDiv.className = 'job-analysis-item';
-        itemDiv.style.cssText = styles.item;
         itemDiv.innerText = item;
         resultsDiv.appendChild(itemDiv);
     });
@@ -368,14 +300,7 @@ function displayAnalysisResults(container, analysis, isCached = false) {
     if (isCached) {
         const cachedIndicator = document.createElement('div');
         cachedIndicator.className = 'cached-indicator';
-        cachedIndicator.style.cssText = `
-            font-size: 12px;
-            color: #666;
-            margin-top: 8px;
-            display: flex;
-            align-items: center;
-        `;
-        cachedIndicator.innerHTML = '<span style="color: #0a66c2; margin-right: 4px;">&#8635;</span> Showing cached analysis';
+        cachedIndicator.innerHTML = '<span class="cached-indicator-icon">&#8635;</span> Showing cached analysis';
         resultsDiv.appendChild(cachedIndicator);
     }
 
@@ -395,13 +320,11 @@ async function injectAnalyzeButton() {
     // Create container
     const container = document.createElement('div');
     container.className = 'job-analysis-container';
-    container.style.cssText = styles.container;
 
     // Create analysis button with LinkedIn style
     const analyzeButton = document.createElement('button');
-    analyzeButton.className = 'artdeco-button artdeco-button--secondary artdeco-button--3';
+    analyzeButton.className = 'artdeco-button artdeco-button--secondary artdeco-button--3 job-analysis-button';
     analyzeButton.textContent = 'Analyze Job';
-    analyzeButton.style.cssText = styles.button;
 
     // Add click handler
     analyzeButton.addEventListener('click', async () => {
