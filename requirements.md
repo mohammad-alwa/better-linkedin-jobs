@@ -6,6 +6,7 @@ Better LinkedIn Jobs (BLJ) is a Chrome extension that enhances the job search ex
 ### Set Up
 BLJ requires a gemini API key to function, the user needs to input the key in the extension. BLJ will validate and store the API key securely in the extension storage.
 Users can remove or change their API keys later.
+If the API key is present, there will be a checkbox for "Auto Analysis", disabled by default.
 
 ### Analysis
 - BLJ can perform analysis on both the jobs search and job pages.
@@ -43,6 +44,10 @@ Users can remove or change their API keys later.
         }
         ```
 - BLJ will display the analysis result inplace of the Analyze button.
+- BLJ caches the analysis results per job ID to improve the performance and reduce unnecessary API calls, the cache is implemented in-memory for performance and backed by the extension local storage asynchronously for durability.
+    - Job ID can be identified as a query parameter in the job search page `https://www.linkedin.com/jobs/search/?currentJobId={jobId}` or as a path variable in the job details page `https://www.linkedin.com/jobs/view/{jobId}`
+    - If a job has an entry in the cache then display the analysis result immediately.
+    - After performing analysis, store the result in the cache. If the entry exists then overwrite it. The cache is capped at 256 entries. Cache eviction is based on FIFO.
 
 ### UI/UX
 - BLJ will use style similar to LinkedIn for both the settings popup, analysis button and the analysis result.
