@@ -49,6 +49,13 @@ If the API key is present, there will be a checkbox for "Auto Analysis", disable
     - If a job has an entry in the cache then display the analysis result immediately.
     - After performing analysis, store the result in the cache. If the entry exists then overwrite it. The cache is capped at 256 entries. Cache eviction is based on FIFO.
 
+### Analysis Result in the List View
+- This applies only to the jobs search page.
+- Job card is identified by the css class `job-card-container`. It also has a `data-job-id` that contain the job ID.
+- For each job card, get its job ID and if it has an entry in the analysis cache then:
+    - Look for `ul` that has class `job-card-list__footer-wrapper` within the card
+    - Append to it an `li` item containing the analysis result
+
 ### UI/UX
 - BLJ will use style similar to LinkedIn for both the settings popup, analysis button and the analysis result.
 - BLJ will follow best practicies in UI/UX to create modern design, it will utlize css without any external dependecy.

@@ -79,3 +79,24 @@
     color: #0a66c2;
     margin-right: 4px;
 }
+
+/* Job card analysis container */
+.job-card-analysis-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #e0e0e0;
+}
+
+/* Job card analysis item */
+.job-card-analysis-item {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 2px;
+    font-size: 12px;
+    color: #0a66c2;
+    font-weight: 600;
+    white-space: nowrap;
+}

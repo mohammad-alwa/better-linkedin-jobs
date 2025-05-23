@@ -2,6 +2,8 @@ const SELECTORS = {
   jobTitle: '.job-details-jobs-unified-top-card__job-title',
   companyName: '.job-details-jobs-unified-top-card__company-name',
   jobDescription: '.jobs-description__container',
+  jobCard: '.job-card-container',
+  jobCardFooter: '.job-card-list__footer-wrapper',
 };
 
 // Cache configuration
@@ -10,6 +12,11 @@ const CACHE_STORAGE_KEY = 'jobAnalysisCache';
 
 // In-memory cache for job analysis results
 const memoryCache = new Map(); // Map<jobId, analysisResult>
+
+// Function to check if we're on the job search page
+function isJobSearchPage() {
+  return window.location.href.includes('/jobs/search/');
+}
 
 // Function to extract job ID from URL
 function extractJobId() {
@@ -419,16 +426,93 @@ function watchUrlChangeAndClearAnalysis() {
             lastJobId = currentJobId;
 
             // Remove all analysis containers
-            document.querySelectorAll('.job-analysis-container').forEach(el => {
+            document.querySelectorAll('.job-analysis-container, .job-card-analysis-container').forEach(el => {
                 el.remove();
             });
 
             // Re-inject the analyze button (which will check for cached analysis)
             setTimeout(() => {
                 injectAnalyzeButton();
+
+                // Re-enhance job cards if on search page
+                if (isJobSearchPage()) {
+                    enhanceJobCards();
+                }
             }, 500);
         }
     }, 500);
+}
+
+// Function to display analysis results in job card
+function displayJobCardAnalysisResults(jobCard, analysis) {
+    // Find the footer wrapper
+    const footerWrapper = jobCard.querySelector(SELECTORS.jobCardFooter);
+    if (!footerWrapper) return;
+
+    // Check if we already added analysis results
+    if (jobCard.querySelector('.job-card-analysis-item')) return;
+
+    // Define analysis items to display
+    const items = [
+        analysis.language,
+        analysis.scope,
+        analysis.programming,
+        analysis.experience
+    ];
+
+    // Create and append each result item
+    items.forEach(item => {
+        if (!item) return; // Skip empty items
+        // Create a list item for the analysis results
+        const analysisLi = document.createElement('li');
+        analysisLi.className = 'job-card-container__footer-item';
+
+        const itemSpan = document.createElement('span');
+        itemSpan.className = 'job-card-analysis-item';
+        itemSpan.innerText = item;
+        analysisLi.appendChild(itemSpan);
+        // Add to the footer
+        footerWrapper.appendChild(analysisLi);
+    });
+
+}
+
+// Function to enhance job cards with analysis results
+function enhanceJobCards() {
+    if (!isJobSearchPage()) return;
+
+    // Find all job cards
+    const jobCards = document.querySelectorAll(SELECTORS.jobCard);
+
+    jobCards.forEach(card => {
+        // Extract job ID from the card
+        const jobId = card.getAttribute('data-job-id');
+        if (!jobId) return;
+
+        // Check if we have a cached analysis for this job
+        const cachedAnalysis = getFromCache(jobId);
+        if (cachedAnalysis) {
+            displayJobCardAnalysisResults(card, cachedAnalysis);
+        }
+    });
+}
+
+// Function to observe job cards on the search page
+function observeJobCards() {
+    if (!isJobSearchPage()) return;
+
+    const jobCardsObserver = new MutationObserver(() => {
+        enhanceJobCards();
+    });
+
+    // Observe the job search results container
+    const jobsContainer = document.querySelector('.jobs-search-results-list');
+    if (jobsContainer) {
+        jobCardsObserver.observe(jobsContainer, { childList: true, subtree: true });
+    } else {
+        // If container not found, observe the body and check again when DOM changes
+        jobCardsObserver.observe(document.body, { childList: true, subtree: true });
+    }
 }
 
 // Function to initialize the extension
@@ -438,6 +522,12 @@ function initializeExtension() {
     // Start observers
     observeForJobTitleOrSearchPanel();
     watchUrlChangeAndClearAnalysis();
+
+    // Enhance job cards on search page
+    setTimeout(() => {
+        enhanceJobCards();
+        observeJobCards();
+    }, 1000);
 }
 
 // --- Start observing when DOM is ready ---
