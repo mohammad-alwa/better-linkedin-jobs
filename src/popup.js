@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', () => {
     // UI Elements
     const apiKeyInput = document.getElementById('apiKey');
     const saveButton = document.getElementById('saveKey');
@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const autoAnalysisCheckbox = document.getElementById('autoAnalysisCheckbox');
 
     // Add ripple effect to buttons
-    function createRipple(event) {
+    const createRipple = (event) => {
         const button = event.currentTarget;
         const ripple = document.createElement('span');
         const rect = button.getBoundingClientRect();
@@ -36,21 +36,21 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => {
             ripple.remove();
         }, 600);
-    }
+    };
 
     // Add ripple effect to all buttons
-    function addRippleToButtons() {
+    const addRippleToButtons = () => {
         const buttons = document.querySelectorAll('.btn');
         buttons.forEach(button => {
             button.addEventListener('click', createRipple);
         });
-    }
+    };
 
     // Initialize ripple effect
     addRippleToButtons();
 
     // Show status message
-    function showStatus(message, type) {
+    const showStatus = (message, type) => {
         statusDiv.innerHTML = '';
 
         const icon = document.createElement('span');
@@ -69,20 +69,20 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => {
             statusDiv.classList.remove('visible');
         }, 5000);
-    }
+    };
 
     // Mask API key (show first 4 and last 4 characters)
-    function maskApiKey(apiKey) {
+    const maskApiKey = (apiKey) => {
         if (!apiKey || apiKey.length < 8) return apiKey;
 
         const firstFour = apiKey.substring(0, 4);
         const lastFour = apiKey.substring(apiKey.length - 4);
 
         return `${firstFour}****${lastFour}`;
-    }
+    };
 
     // Validate API key by making a request to the Gemini API
-    async function validateApiKey(apiKey) {
+    const validateApiKey = async (apiKey) => {
         try {
             const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
 
@@ -101,10 +101,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 error: 'Network error. Please check your connection.'
             };
         }
-    }
+    };
 
     // Show the appropriate UI state based on whether an API key exists
-    function showUiState(hasKey, apiKey = '') {
+    const showUiState = (hasKey, apiKey = '') => {
         if (hasKey) {
             noKeyState.style.display = 'none';
             existingKeyState.style.display = 'block';
@@ -115,24 +115,24 @@ document.addEventListener('DOMContentLoaded', function() {
             apiKeyInput.value = '';
             apiKeyInput.classList.remove('has-value');
         }
-    }
+    };
 
     // Handle input focus events for floating label effect
-    apiKeyInput.addEventListener('focus', function() {
-        this.parentElement.classList.add('focused');
+    apiKeyInput.addEventListener('focus', (event) => {
+        event.target.parentElement.classList.add('focused');
     });
 
-    apiKeyInput.addEventListener('blur', function() {
-        this.parentElement.classList.remove('focused');
-        if (this.value.trim() !== '') {
-            this.classList.add('has-value');
+    apiKeyInput.addEventListener('blur', (event) => {
+        event.target.parentElement.classList.remove('focused');
+        if (event.target.value.trim() !== '') {
+            event.target.classList.add('has-value');
         } else {
-            this.classList.remove('has-value');
+            event.target.classList.remove('has-value');
         }
     });
 
     // Handle save button click
-    saveButton.addEventListener('click', async function() {
+    saveButton.addEventListener('click', async () => {
         const apiKey = apiKeyInput.value.trim();
 
         if (!apiKey) {
@@ -146,38 +146,38 @@ document.addEventListener('DOMContentLoaded', function() {
         saveButton.appendChild(loadingSpinner);
         saveButton.disabled = true;
 
-        // Validate the API key
-        const validation = await validateApiKey(apiKey);
+            // Validate the API key
+            const validation = await validateApiKey(apiKey);
 
-        if (!validation.valid) {
-            loadingSpinner.remove();
-            saveButton.disabled = false;
-            showStatus(validation.error, 'error');
-            return;
-        }
+            if (!validation.valid) {
+                loadingSpinner.remove();
+                saveButton.disabled = false;
+                showStatus(validation.error, 'error');
+                return;
+            }
 
-        // Save the API key to Chrome extension storage
+            // Save the API key to Chrome extension storage
         chrome.storage.local.set({ geminiApiKey: apiKey }, function() {
             // Remove loading spinner
             loadingSpinner.remove();
             saveButton.disabled = false;
 
-            if (chrome.runtime.lastError) {
-                showStatus('Error saving API key: ' + chrome.runtime.lastError.message, 'error');
-            } else {
-                showStatus('API key saved successfully!', 'success');
-                showUiState(true, apiKey);
-            }
+                    if (chrome.runtime.lastError) {
+                        showStatus('Error saving API key: ' + chrome.runtime.lastError.message, 'error');
+                    } else {
+                        showStatus('API key saved successfully!', 'success');
+                        showUiState(true, apiKey);
+                    }
         });
     });
 
     // Handle change key button click
-    changeKeyButton.addEventListener('click', function() {
+    changeKeyButton.addEventListener('click', () => {
         showUiState(false);
     });
 
     // Handle remove key button click
-    removeKeyButton.addEventListener('click', function() {
+    removeKeyButton.addEventListener('click', async () => {
         // Show loading state
         const loadingSpinner = document.createElement('span');
         loadingSpinner.className = 'loading';
@@ -185,7 +185,7 @@ document.addEventListener('DOMContentLoaded', function() {
         removeKeyButton.disabled = true;
         changeKeyButton.disabled = true;
 
-        // Remove the API key from Chrome extension storage
+            // Remove the API key from Chrome extension storage
         chrome.storage.local.remove('geminiApiKey', function() {
             // Remove loading spinner
             loadingSpinner.remove();
@@ -202,33 +202,33 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Handle auto analysis checkbox change
-    autoAnalysisCheckbox.addEventListener('change', function() {
-        const isChecked = this.checked;
+    autoAnalysisCheckbox.addEventListener('change', async (event) => {
+        const isChecked = event.target.checked;
 
-        // Save the auto analysis setting to storage
+            // Save the auto analysis setting to storage
         chrome.storage.local.set({ autoAnalysisEnabled: isChecked }, function() {
-            if (chrome.runtime.lastError) {
-                showStatus('Error saving setting: ' + chrome.runtime.lastError.message, 'error');
-            } else {
-                showStatus(
-                    isChecked ? 'Auto Analysis enabled' : 'Auto Analysis disabled',
-                    'success'
-                );
-            }
-        });
-    });
+                    if (chrome.runtime.lastError) {
+                        showStatus('Error saving setting: ' + chrome.runtime.lastError.message, 'error');
+                    } else {
+                        showStatus(
+                            isChecked ? 'Auto Analysis enabled' : 'Auto Analysis disabled',
+                            'success'
+                        );
+                    }
+                });
+            });
 
     // Check if API key already exists in extension storage and load auto analysis setting
     chrome.storage.local.get(['geminiApiKey', 'autoAnalysisEnabled'], function(result) {
-        if (result.geminiApiKey) {
-            showUiState(true, result.geminiApiKey);
+            if (result.geminiApiKey) {
+                showUiState(true, result.geminiApiKey);
 
-            // Set checkbox state based on stored setting
-            if (result.autoAnalysisEnabled !== undefined) {
-                autoAnalysisCheckbox.checked = result.autoAnalysisEnabled;
+                // Set checkbox state based on stored setting
+                if (result.autoAnalysisEnabled !== undefined) {
+                    autoAnalysisCheckbox.checked = result.autoAnalysisEnabled;
+                }
+            } else {
+                showUiState(false);
             }
-        } else {
-            showUiState(false);
-        }
     });
 });

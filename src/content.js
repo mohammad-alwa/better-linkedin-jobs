@@ -9,6 +9,7 @@ const SELECTORS = {
 // Cache configuration
 const CACHE_SIZE_LIMIT = 256;
 const CACHE_STORAGE_KEY = 'jobAnalysisCache';
+const API_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
 // In-memory cache for job analysis results
 const memoryCache = new Map(); // Map<jobId, analysisResult>
@@ -17,15 +18,13 @@ const memoryCache = new Map(); // Map<jobId, analysisResult>
 let isAutoAnalysisEnabled = false;
 
 // Function to check if we're on the job search page
-function isJobSearchPage() {
-  return window.location.href.includes('/jobs/search/');
-}
+const isJobSearchPage = () => window.location.href.includes('/jobs/search/');
 
 // Function to extract job ID from URL
-function extractJobId() {
+const extractJobId = () => {
   // Try to extract from job details page URL: https://www.linkedin.com/jobs/view/{jobId}
   const viewMatch = window.location.href.match(/\/jobs\/view\/(\d+)/);
-  if (viewMatch && viewMatch[1]) {
+  if (viewMatch?.[1]) {
     return viewMatch[1];
   }
 
@@ -40,7 +39,7 @@ function extractJobId() {
 }
 
 // Function to add an analysis result to the cache
-function addToCache(jobId, analysisResult) {
+const addToCache = (jobId, analysisResult) => {
   if (!jobId || !analysisResult) return;
 
   // If cache is at capacity, remove the oldest entry (FIFO)
@@ -60,10 +59,10 @@ function addToCache(jobId, analysisResult) {
   saveCache();
 
   console.log(`Added job ${jobId} to analysis cache. Cache size: ${memoryCache.size}`);
-}
+};
 
 // Function to get an analysis result from the cache
-function getFromCache(jobId) {
+const getFromCache = (jobId) => {
   if (!jobId) return null;
 
   const cachedEntry = memoryCache.get(jobId);
@@ -74,10 +73,10 @@ function getFromCache(jobId) {
 
   console.log(`Cache miss for job ${jobId}`);
   return null;
-}
+};
 
 // Function to save the cache to chrome.storage.local
-function saveCache() {
+const saveCache = () => {
   try {
     // Convert Map to array of entries to preserve order
     const entriesArray = Array.from(memoryCache.entries());
@@ -92,22 +91,23 @@ function saveCache() {
   } catch (error) {
     console.error('Error saving cache:', error);
   }
-}
+};
 
 // Function to load the cache from chrome.storage.local
-function loadCache() {
+const loadCache = () => {
   chrome.storage.local.get([CACHE_STORAGE_KEY], (result) => {
     if (chrome.runtime.lastError) {
       console.error('Error loading cache:', chrome.runtime.lastError);
       return;
     }
 
-    if (result[CACHE_STORAGE_KEY]) {
+    const cachedData = result[CACHE_STORAGE_KEY];
+    if (cachedData) {
       // Clear existing cache
       memoryCache.clear();
 
       // Populate cache from storage
-      result[CACHE_STORAGE_KEY].forEach(([jobId, data]) => {
+      cachedData.forEach(([jobId, data]) => {
         memoryCache.set(jobId, data);
       });
 
@@ -116,13 +116,13 @@ function loadCache() {
       console.log('No cached data found in storage');
     }
   });
-}
+};
 
 // Initialize cache when script loads
 loadCache();
 
 // Function to load auto analysis setting
-function loadAutoAnalysisSetting() {
+const loadAutoAnalysisSetting = () => {
     chrome.storage.local.get(['autoAnalysisEnabled'], (result) => {
         if (chrome.runtime.lastError) {
             console.error('Error loading auto analysis setting:', chrome.runtime.lastError);
@@ -132,7 +132,7 @@ function loadAutoAnalysisSetting() {
         isAutoAnalysisEnabled = result.autoAnalysisEnabled === true;
         console.log(`Auto analysis is ${isAutoAnalysisEnabled ? 'enabled' : 'disabled'}`);
     });
-}
+};
 
 // Listen for changes to auto analysis setting
 chrome.storage.onChanged.addListener((changes, namespace) => {
@@ -145,40 +145,29 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
 // Initialize auto analysis setting
 loadAutoAnalysisSetting();
 
-
-
 // Function to extract job title from LinkedIn (details and search panel)
-function extractJobTitle() {
-    let titleElement = document.querySelector(SELECTORS.jobTitle);
-    if (titleElement) {
-        return titleElement.textContent.trim();
-    }
-    return null;
-}
+const extractJobTitle = () => {
+    const titleElement = document.querySelector(SELECTORS.jobTitle);
+    return titleElement?.textContent.trim() ?? null;
+};
 
 // Function to extract company name from LinkedIn (details and search panel)
-function extractCompanyName() {
-    let companyElement = document.querySelector(SELECTORS.companyName);
-    if (companyElement) {
-        return companyElement.textContent.trim();
-    }
-    return null;
-}
+const extractCompanyName = () => {
+    const companyElement = document.querySelector(SELECTORS.companyName);
+    return companyElement?.textContent.trim() ?? null;
+};
 
 // Function to extract job description from LinkedIn (details and search panel)
-function extractJobDescription() {
-    let descriptionElement = document.querySelector(SELECTORS.jobDescription);
-    if (descriptionElement) {
-        return descriptionElement.textContent.trim();
-    }
-    return null;
-}
+const extractJobDescription = () => {
+    const descriptionElement = document.querySelector(SELECTORS.jobDescription);
+    return descriptionElement?.textContent.trim() ?? null;
+};
 
 // Function to analyze job description using Gemini API
-async function analyzeJobDescription() {
+const analyzeJobDescription = async (specificJobId = null) => {
     try {
-        // Get the current job ID
-        const jobId = extractJobId();
+        // Get the current job ID or use the provided one
+        const jobId = specificJobId || extractJobId();
 
         // Get API key from storage
         const result = await chrome.storage.local.get(['geminiApiKey']);
@@ -213,9 +202,8 @@ programming: what's the main programming language required?
 experience: what's the experience level required? Add years of experience if mentioned.
 `;
 
-
         // Make API call
-        const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent', {
+        const response = await fetch(API_ENDPOINT, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -244,7 +232,7 @@ experience: what's the experience level required? Add years of experience if men
         });
 
         if (!response.ok) {
-            throw new Error('API request failed');
+            throw new Error(`API request failed with status: ${response.status}`);
         }
 
         const data = await response.json();
@@ -278,7 +266,7 @@ experience: what's the experience level required? Add years of experience if men
 
 
 // Helper function to show loading state on a button
-function setButtonLoading(button, isLoading) {
+const setButtonLoading = (button, isLoading) => {
     if (isLoading) {
         button.disabled = true;
 
@@ -316,12 +304,10 @@ function setButtonLoading(button, isLoading) {
 
         button.classList.remove('button-loading');
     }
-}
-
-
+};
 
 // Function to display analysis results
-function displayAnalysisResults(container, analysis, isCached = false) {
+const displayAnalysisResults = (container, analysis, isCached = false) => {
     // Remove previous results
     const oldResults = container.querySelector('.job-analysis-results');
     if (oldResults) oldResults.remove();
@@ -358,13 +344,13 @@ function displayAnalysisResults(container, analysis, isCached = false) {
 
     container.appendChild(resultsDiv);
     return resultsDiv;
-}
+};
 
 // --- Robustly inject Analyze Job button after job title (details and search panel) ---
-async function injectAnalyzeButton() {
+const injectAnalyzeButton = async () => {
     // Try details page selectors
-    let jobTitle = document.querySelector(SELECTORS.jobTitle);
-    let h1 = jobTitle ? jobTitle.querySelector('h1') : null;
+    const jobTitle = document.querySelector(SELECTORS.jobTitle);
+    const h1 = jobTitle?.querySelector('h1');
 
     if (!jobTitle || !h1) return;
     if (jobTitle.parentNode.querySelector('.job-analysis-container')) return;
@@ -417,18 +403,19 @@ async function injectAnalyzeButton() {
             // Show loading state
             setButtonLoading(analyzeButton, true);
 
-            // Trigger analysis
-            analyzeJobDescription().then(analysis => {
+            try {
+                // Trigger analysis
+                const analysis = await analyzeJobDescription();
+
                 if (analysis) {
                     displayAnalysisResults(container, analysis, false);
                 }
-
+            } catch (error) {
+                console.error('Auto analysis failed:', error);
+            } finally {
                 // Reset button state
                 setButtonLoading(analyzeButton, false);
-            }).catch(error => {
-                console.error('Auto analysis failed:', error);
-                setButtonLoading(analyzeButton, false);
-            });
+            }
         }
     }
 }
@@ -436,25 +423,25 @@ async function injectAnalyzeButton() {
 
 // --- Wait for job title or search panel using MutationObserver ---
 let observer;
-function observeForJobTitleOrSearchPanel() {
+const observeForJobTitleOrSearchPanel = () => {
     if (observer) observer.disconnect();
     observer = new MutationObserver(() => {
         injectAnalyzeButton();
     });
     observer.observe(document.body, { childList: true, subtree: true });
-}
+};
 
 // --- Watch for URL changes and job ID changes ---
 let lastUrl = location.href;
 let lastJobId = extractJobId();
 
-function cleanupObservers() {
+const cleanupObservers = () => {
     if (observer) observer.disconnect();
-}
+};
 
 window.addEventListener('beforeunload', cleanupObservers);
 
-function watchUrlChangeAndClearAnalysis() {
+const watchUrlChangeAndClearAnalysis = () => {
     setInterval(() => {
         const currentUrl = location.href;
         const currentJobId = extractJobId();
@@ -487,10 +474,10 @@ function watchUrlChangeAndClearAnalysis() {
             }, 500);
         }
     }, 500);
-}
+};
 
 // Function to display analysis results in job card
-function displayJobCardAnalysisResults(jobCard, analysis) {
+const displayJobCardAnalysisResults = (jobCard, analysis) => {
     // Find the footer wrapper
     const footerWrapper = jobCard.querySelector(SELECTORS.jobCardFooter);
     if (!footerWrapper) return;
@@ -509,6 +496,7 @@ function displayJobCardAnalysisResults(jobCard, analysis) {
     // Create and append each result item
     items.forEach(item => {
         if (!item) return; // Skip empty items
+
         // Create a list item for the analysis results
         const analysisLi = document.createElement('li');
         analysisLi.className = 'job-card-container__footer-item';
@@ -517,14 +505,14 @@ function displayJobCardAnalysisResults(jobCard, analysis) {
         itemSpan.className = 'job-card-analysis-item';
         itemSpan.innerText = item;
         analysisLi.appendChild(itemSpan);
+
         // Add to the footer
         footerWrapper.appendChild(analysisLi);
     });
-
-}
+};
 
 // Function to enhance job cards with analysis results
-function enhanceJobCards() {
+const enhanceJobCards = () => {
     if (!isJobSearchPage()) return;
 
     // Find all job cards
@@ -544,7 +532,7 @@ function enhanceJobCards() {
 }
 
 // Function to observe job cards on the search page
-function observeJobCards() {
+const observeJobCards = () => {
     if (!isJobSearchPage()) return;
 
     const jobCardsObserver = new MutationObserver(() => {
@@ -562,7 +550,7 @@ function observeJobCards() {
 }
 
 // Function to initialize the extension
-function initializeExtension() {
+const initializeExtension = () => {
     console.log('Initializing Better LinkedIn extension with job analysis caching');
 
     // Start observers
@@ -574,7 +562,7 @@ function initializeExtension() {
         enhanceJobCards();
         observeJobCards();
     }, 1000);
-}
+};
 
 // --- Start observing when DOM is ready ---
 if (document.readyState === 'loading') {
