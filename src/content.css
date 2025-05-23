@@ -55,6 +55,9 @@
     border-radius: 50%;
     border-top-color: transparent;
     animation: betterLinkedinSpin 1s linear infinite;
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
 }
 
 /* Button in loading state */

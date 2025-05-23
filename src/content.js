@@ -252,16 +252,34 @@ function setButtonLoading(button, isLoading) {
         const existingSpinner = button.querySelector('.bli-loading-spinner');
         if (existingSpinner) existingSpinner.remove();
 
-        // Create new spinner
+        // Save the original text content if not already saved
+        if (!button.dataset.originalText) {
+            button.dataset.originalText = button.textContent;
+        }
+
+        // Update button text
+        button.textContent = 'Analyzing...';
+
+        // Create spinner element
         const spinner = document.createElement('span');
         spinner.className = 'bli-loading-spinner';
 
+        // Append spinner to button
         button.appendChild(spinner);
         button.classList.add('button-loading');
     } else {
         button.disabled = false;
+
+        // Remove spinner
         const spinner = button.querySelector('.bli-loading-spinner');
         if (spinner) spinner.remove();
+
+        // Restore original text if available
+        if (button.dataset.originalText) {
+            button.textContent = button.dataset.originalText;
+            delete button.dataset.originalText;
+        }
+
         button.classList.remove('button-loading');
     }
 }
@@ -331,7 +349,6 @@ async function injectAnalyzeButton() {
         try {
             // Show loading state
             setButtonLoading(analyzeButton, true);
-            analyzeButton.textContent = 'Analyzing...';
 
             // Force a new analysis even if we have a cached one
             const analysis = await analyzeJobDescription();
@@ -342,13 +359,11 @@ async function injectAnalyzeButton() {
 
             // Reset button state
             setButtonLoading(analyzeButton, false);
-            analyzeButton.textContent = 'Analyze Job';
         } catch (error) {
             console.error('Error displaying analysis:', error);
             alert('Failed to analyze job description');
             // Reset button state
             setButtonLoading(analyzeButton, false);
-            analyzeButton.textContent = 'Analyze Job';
         }
     });
 
