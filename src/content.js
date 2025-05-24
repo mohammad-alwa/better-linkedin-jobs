@@ -1,77 +1,20 @@
-const SELECTORS = {
-  jobTitle: '.job-details-jobs-unified-top-card__job-title',
-  companyName: '.job-details-jobs-unified-top-card__company-name',
-  jobDescription: '.jobs-description__container',
-  jobCard: '.job-card-container',
-  jobCardFooter: '.job-card-list__footer-wrapper',
-};
-
-const API_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
-
 // Auto analysis configuration
 let isAutoAnalysisEnabled = false;
 
-// Function to check if we're on the job search page
-const isJobSearchPage = () => window.location.href.includes('/jobs/search/');
-
-// Function to extract job ID from URL
-const extractJobId = () => {
-  // Try to extract from job details page URL: https://www.linkedin.com/jobs/view/{jobId}
-  const viewMatch = window.location.href.match(/\/jobs\/view\/(\d+)/);
-  if (viewMatch?.[1]) {
-    return viewMatch[1];
-  }
-
-  // Try to extract from job search page URL: https://www.linkedin.com/jobs/search/?currentJobId={jobId}
-  const searchParams = new URLSearchParams(window.location.search);
-  const currentJobId = searchParams.get('currentJobId');
-  if (currentJobId) {
-    return currentJobId;
-  }
-
-  return null;
-}
+let lastUrl = location.href;
+let lastJobId = extractJobId();
 
 // Function to load auto analysis setting
-const loadAutoAnalysisSetting = () => {
-  chrome.storage.local.get(['autoAnalysisEnabled'], (result) => {
-    if (chrome.runtime.lastError) {
-      console.error('Error loading auto analysis setting:', chrome.runtime.lastError);
-      return;
-    }
+const loadAutoAnalysisSetting = async () => {
+  const result = await chrome.storage.local.get(['autoAnalysisEnabled']);
 
-    isAutoAnalysisEnabled = result.autoAnalysisEnabled === true;
-    console.log(`Auto analysis is ${isAutoAnalysisEnabled ? 'enabled' : 'disabled'}`);
-  });
-};
-
-// Listen for changes to auto analysis setting
-chrome.storage.onChanged.addListener((changes, namespace) => {
-  if (namespace === 'local' && changes.autoAnalysisEnabled) {
-    isAutoAnalysisEnabled = changes.autoAnalysisEnabled.newValue === true;
-    console.log(`Auto analysis setting changed to: ${isAutoAnalysisEnabled ? 'enabled' : 'disabled'}`);
+  if (chrome.runtime.lastError) {
+    console.error('Error loading auto analysis setting:', chrome.runtime.lastError);
+    return;
   }
-});
 
-// Initialize auto analysis setting
-loadAutoAnalysisSetting();
-
-// Function to extract job title from LinkedIn (details and search panel)
-const extractJobTitle = () => {
-  const titleElement = document.querySelector(SELECTORS.jobTitle);
-  return titleElement?.textContent.trim() ?? null;
-};
-
-// Function to extract company name from LinkedIn (details and search panel)
-const extractCompanyName = () => {
-  const companyElement = document.querySelector(SELECTORS.companyName);
-  return companyElement?.textContent.trim() ?? null;
-};
-
-// Function to extract job description from LinkedIn (details and search panel)
-const extractJobDescription = () => {
-  const descriptionElement = document.querySelector(SELECTORS.jobDescription);
-  return descriptionElement?.textContent.trim() ?? null;
+  isAutoAnalysisEnabled = result.autoAnalysisEnabled === true;
+  console.log('Auto analysis', isAutoAnalysisEnabled);
 };
 
 // Function to analyze job description using Gemini API
@@ -173,8 +116,6 @@ experience: what's the experience level required? Add years of experience if men
   }
 }
 
-
-
 // Helper function to show loading state on a button
 const setButtonLoading = (button, isLoading) => {
   if (isLoading) {
@@ -253,6 +194,7 @@ const displayAnalysisResults = (container, analysis, isCached = false) => {
   }
 
   container.appendChild(resultsDiv);
+  enhanceJobCards();
   return resultsDiv;
 };
 
@@ -308,7 +250,6 @@ const injectAnalyzeButton = async () => {
       displayAnalysisResults(container, cachedAnalysis, true);
     } else if (isAutoAnalysisEnabled) {
       // If auto analysis is enabled and no cached result, trigger analysis automatically
-      console.log(`Auto analysis triggered for job ${jobId}`);
 
       // Show loading state
       setButtonLoading(analyzeButton, true);
@@ -341,15 +282,6 @@ const observeForJobTitleOrSearchPanel = () => {
   observer.observe(document.body, { childList: true, subtree: true });
 };
 
-// --- Watch for URL changes and job ID changes ---
-let lastUrl = location.href;
-let lastJobId = extractJobId();
-
-const cleanupObservers = () => {
-  if (observer) observer.disconnect();
-};
-
-window.addEventListener('beforeunload', cleanupObservers);
 
 const watchUrlChangeAndClearAnalysis = () => {
   setInterval(() => {
@@ -358,13 +290,6 @@ const watchUrlChangeAndClearAnalysis = () => {
 
     // Check if URL or job ID has changed
     if (currentUrl !== lastUrl || (currentJobId && currentJobId !== lastJobId)) {
-      console.log('URL or job ID changed', {
-        oldUrl: lastUrl,
-        newUrl: currentUrl,
-        oldJobId: lastJobId,
-        newJobId: currentJobId
-      });
-
       lastUrl = currentUrl;
       lastJobId = currentJobId;
 
@@ -445,24 +370,19 @@ const enhanceJobCards = () => {
 const observeJobCards = () => {
   if (!isJobSearchPage()) return;
 
-  const jobCardsObserver = new MutationObserver(() => {
+  const jobCardsObserver = new MutationObserver((m) => {
     enhanceJobCards();
   });
 
   // Observe the job search results container
-  const jobsContainer = document.querySelector('.jobs-search-results-list');
+  const jobsContainer = document.querySelector('.scaffold-layout__list');
   if (jobsContainer) {
     jobCardsObserver.observe(jobsContainer, { childList: true, subtree: true });
-  } else {
-    // If container not found, observe the body and check again when DOM changes
-    jobCardsObserver.observe(document.body, { childList: true, subtree: true });
   }
 }
 
 // Function to initialize the extension
 const initializeExtension = () => {
-  console.log('Initializing Better LinkedIn extension with job analysis caching');
-
   // Start observers
   observeForJobTitleOrSearchPanel();
   watchUrlChangeAndClearAnalysis();
@@ -474,13 +394,36 @@ const initializeExtension = () => {
   }, 1000);
 };
 
-// --- Start observing when DOM is ready ---
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM content loaded');
-    initializeExtension();
+
+
+const main = async () => {
+  // Initialize cache when script loads
+  await loadCache();
+
+  // Listen for changes to auto analysis setting
+  chrome.storage.onChanged.addListener((changes, namespace) => {
+    if (namespace === 'local' && changes.autoAnalysisEnabled) {
+      isAutoAnalysisEnabled = changes.autoAnalysisEnabled.newValue === true;
+    }
   });
-} else {
-  console.log('DOM already loaded');
-  initializeExtension();
-}
+
+  // Initialize auto analysis setting
+  await loadAutoAnalysisSetting();
+
+  const cleanupObservers = () => {
+    if (observer) observer.disconnect();
+  };
+
+  window.addEventListener('beforeunload', cleanupObservers);
+
+  // --- Start observing when DOM is ready ---
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      initializeExtension();
+    });
+  } else {
+    initializeExtension();
+  }
+};
+
+main();

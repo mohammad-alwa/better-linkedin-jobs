@@ -33,11 +33,9 @@ const getFromCache = (jobId) => {
 
     const cachedEntry = memoryCache.get(jobId);
     if (cachedEntry) {
-        console.log(`Cache hit for job ${jobId}`);
         return cachedEntry.result;
     }
 
-    console.log(`Cache miss for job ${jobId}`);
     return null;
 };
 
@@ -60,29 +58,26 @@ const saveCache = () => {
 };
 
 // Function to load the cache from chrome.storage.local
-const loadCache = () => {
-    chrome.storage.local.get([CACHE_STORAGE_KEY], (result) => {
-        if (chrome.runtime.lastError) {
-            console.error('Error loading cache:', chrome.runtime.lastError);
-            return;
-        }
+const loadCache = async () => {
+    const result = await chrome.storage.local.get([CACHE_STORAGE_KEY]);
 
-        const cachedData = result[CACHE_STORAGE_KEY];
-        if (cachedData) {
-            // Clear existing cache
-            memoryCache.clear();
+    if (chrome.runtime.lastError) {
+        console.error('Error loading cache:', chrome.runtime.lastError);
+        return;
+    }
 
-            // Populate cache from storage
-            cachedData.forEach(([jobId, data]) => {
-                memoryCache.set(jobId, data);
-            });
+    const cachedData = result[CACHE_STORAGE_KEY];
+    if (cachedData) {
+        // Clear existing cache
+        memoryCache.clear();
 
-            console.log(`Loaded ${memoryCache.size} entries from persistent cache`);
-        } else {
-            console.log('No cached data found in storage');
-        }
-    });
+        // Populate cache from storage
+        cachedData.forEach(([jobId, data]) => {
+            memoryCache.set(jobId, data);
+        });
+
+        console.log(`Loaded ${memoryCache.size} entries from persistent cache`);
+    } else {
+        console.log('No cached data found in storage');
+    }
 };
-
-// Initialize cache when script loads
-loadCache();

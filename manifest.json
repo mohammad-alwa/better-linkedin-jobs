@@ -17,6 +17,7 @@
         "https://www.linkedin.com/jobs/*"
       ],
       "js": [
+        "src/utils.js",
         "src/cache.js",
         "src/content.js"
       ],
