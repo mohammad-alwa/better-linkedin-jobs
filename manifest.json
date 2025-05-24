@@ -22,7 +22,7 @@
         "src/content.js"
       ],
       "css": [
-        "src/content.css"
+        "src/assets/css/content.css"
       ]
     }
   ],
