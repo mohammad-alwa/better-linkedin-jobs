@@ -168,20 +168,16 @@ const displayAnalysisResults = (container, analysis, isCached = false) => {
   resultsDiv.className = 'job-analysis-results';
 
   // Define analysis items to display
-  const items = [
-    analysis.language,
-    analysis.scope,
-    analysis.programming,
-    analysis.experience
-  ];
+  const items = titleAnalysisResult(analysis);
 
   // Create and append each result item as a LinkedIn-style pill
   items.forEach(item => {
-    if (!item) return; // Skip empty items
+    if (!item.value) return; // Skip empty items
 
     const itemDiv = document.createElement('div');
     itemDiv.className = 'job-analysis-item';
-    itemDiv.innerText = item;
+    itemDiv.innerText = item.value;
+    itemDiv.title = item.title;
     resultsDiv.appendChild(itemDiv);
   });
 
@@ -321,12 +317,7 @@ const displayJobCardAnalysisResults = (jobCard, analysis) => {
   if (jobCard.querySelector('.job-card-analysis-item')) return;
 
   // Define analysis items to display
-  const items = [
-    analysis.language,
-    analysis.scope,
-    analysis.programming,
-    analysis.experience
-  ];
+  const items = titleAnalysisResult(analysis);
 
   // Create and append each result item
   items.forEach(item => {
@@ -338,7 +329,8 @@ const displayJobCardAnalysisResults = (jobCard, analysis) => {
 
     const itemSpan = document.createElement('span');
     itemSpan.className = 'job-card-analysis-item';
-    itemSpan.innerText = item;
+    itemSpan.innerText = item.value;
+    itemSpan.title = item.title;
     analysisLi.appendChild(itemSpan);
 
     // Add to the footer

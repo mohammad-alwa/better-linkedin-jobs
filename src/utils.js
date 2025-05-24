@@ -46,3 +46,13 @@ const extractJobDescription = () => {
     const descriptionElement = document.querySelector(SELECTORS.jobDescription);
     return descriptionElement?.textContent.trim() ?? null;
 };
+
+// Function to append titles to the analysis result
+const titleAnalysisResult = (analysis) => {
+    return [
+        { title: 'Job Language', value: analysis.language },
+        { title: 'Role', value: analysis.scope },
+        { title: 'Programming Language', value: analysis.programming },
+        { title: 'Experience Level', value: analysis.experience }]
+        ;
+}
