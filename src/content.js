@@ -67,16 +67,16 @@ Given a job description, extract the following information. Respond in json form
           parts: [{ text: prompt }]
         }],
         generationConfig: {
-          responseMimeType: "application/json",
+          responseMimeType: 'application/json',
           responseSchema: {
-            type: "OBJECT",
+            type: 'OBJECT',
             properties: {
-              language: { type: "STRING" },
-              role: { type: "STRING", enum: ["Backend", "Frontend", "Fullstack", "Manager", "AI", "DevOps", "Other"] },
-              programmingLanguage: { type: "STRING" },
-              experience: { type: "STRING" },
+              language: { type: 'STRING' },
+              role: { type: 'STRING', enum: ['Backend', 'Frontend', 'Fullstack', 'Manager', 'AI', 'DevOps', 'Other'] },
+              programmingLanguage: { type: 'STRING' },
+              experience: { type: 'STRING' },
             },
-            propertyOrdering: ["language", "role", "programmingLanguage", "experience"]
+            propertyOrdering: ['language', 'role', 'programmingLanguage', 'experience']
           }
         }
       })
@@ -112,7 +112,7 @@ Given a job description, extract the following information. Respond in json form
     console.error('Error analyzing job description:', error);
     return null;
   }
-}
+};
 
 // Helper function to show loading state on a button
 const setButtonLoading = (button, isLoading) => {
@@ -263,7 +263,7 @@ const injectAnalyzeButton = async () => {
       }
     }
   }
-}
+};
 
 
 // --- Wait for job title or search panel using MutationObserver ---
@@ -354,7 +354,7 @@ const enhanceJobCards = () => {
       displayJobCardAnalysisResults(card, cachedAnalysis);
     }
   });
-}
+};
 
 // Function to observe job cards on the search page
 const observeJobCards = () => {
@@ -369,7 +369,7 @@ const observeJobCards = () => {
   if (jobsContainer) {
     jobCardsObserver.observe(jobsContainer, { childList: true, subtree: true });
   }
-}
+};
 
 // Function to initialize the extension
 const initializeExtension = () => {

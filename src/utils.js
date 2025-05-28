@@ -27,7 +27,7 @@ const extractJobId = () => {
     }
 
     return null;
-}
+};
 
 // Function to extract job title from LinkedIn (details and search panel)
 const extractJobTitle = () => {
@@ -57,4 +57,4 @@ const titleAnalysisResult = (analysis) => {
         { title: 'Programming Language', value: analysis.programmingLanguage },
         { title: 'Experience Level', value: analysis.experience }]
         ;
-}
+};
