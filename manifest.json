@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Better LinkedIn Jobs Extension",
-  "version": "1.0",
+  "version": "1.0.0",
   "description": "A Chrome extension to enhance LinkedIn Jobs experience",
   "permissions": [
     "storage",
