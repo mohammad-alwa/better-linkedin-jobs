@@ -32,6 +32,8 @@ const extractJobId = () => {
 // Function to extract job title from LinkedIn (details and search panel)
 const extractJobTitle = () => {
     const titleElement = document.querySelector(SELECTORS.jobTitle);
+    const h1 = titleElement?.querySelector('h1');
+    if (h1) return h1.textContent.trim();
     return titleElement?.textContent.trim() ?? null;
 };
 
