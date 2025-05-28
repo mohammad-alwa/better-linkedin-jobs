@@ -51,8 +51,8 @@ const extractJobDescription = () => {
 const titleAnalysisResult = (analysis) => {
     return [
         { title: 'Job Language', value: analysis.language },
-        { title: 'Role', value: analysis.scope },
-        { title: 'Programming Language', value: analysis.programming },
+        { title: 'Role', value: analysis.role },
+        { title: 'Programming Language', value: analysis.programmingLanguage },
         { title: 'Experience Level', value: analysis.experience }]
         ;
 }

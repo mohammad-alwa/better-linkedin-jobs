@@ -40,21 +40,18 @@ const analyzeJobDescription = async () => {
     const companyName = extractCompanyName();
 
     // Prepare the prompt
-    const prompt = `Analyze the following job description and provide answers to the questions below:
-
-Job Title: ${jobTitle}
+    const prompt = `Job Title: ${jobTitle}
 Company: ${companyName}
 
 Job Description:
-${jd}
+${jd}`;
 
-Questions
-language: what's the language of the JD
-scope: Is it for Backend, Frontend, Fullstack, Manager, AI, DevOps or Other. If other be more specific in 3 words at most. You can add two scopes at most. Better to have one scope.
-programming: what's the main programming language required?
-experience: what's the experience level required? Add years of experience if mentioned.
-`;
-
+    const systemPrompt = `
+Given a job description, extract the following information. Respond in json format and English language only:
+- language: The language the job description is written in. Output is full word.
+- role: Backend, Frontend, Fullstack, Manager, AI, DevOps or Other. Two roles at most, one role is preferred.
+- programmingLanguage: The main programming language required by the job.
+- experience: The required experience level.`;
     // Make API call
     const response = await fetch(API_ENDPOINT, {
       method: 'POST',
@@ -63,10 +60,11 @@ experience: what's the experience level required? Add years of experience if men
         'x-goog-api-key': apiKey
       },
       body: JSON.stringify({
+        system_instruction: {
+          parts: [{ text: systemPrompt }]
+        },
         contents: [{
-          parts: [{
-            text: prompt
-          }]
+          parts: [{ text: prompt }]
         }],
         generationConfig: {
           responseMimeType: "application/json",
@@ -74,11 +72,11 @@ experience: what's the experience level required? Add years of experience if men
             type: "OBJECT",
             properties: {
               language: { type: "STRING" },
-              scope: { type: "STRING" },
-              programming: { type: "STRING" },
+              role: { type: "STRING", enum: ["Backend", "Frontend", "Fullstack", "Manager", "AI", "DevOps", "Other"] },
+              programmingLanguage: { type: "STRING" },
               experience: { type: "STRING" },
             },
-            propertyOrdering: ["language", "scope", "programming", "experience"]
+            propertyOrdering: ["language", "role", "programmingLanguage", "experience"]
           }
         }
       })
